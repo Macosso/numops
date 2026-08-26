@@ -19,7 +19,10 @@ Description: Provides dependency-free helpers for common numerical operations
 License: GPL-3
 Encoding: UTF-8
 Suggests:
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0
 Config/testthat/edition: 3
