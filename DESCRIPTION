@@ -16,4 +16,7 @@ Description: Provides dependency-free helpers for common numerical operations
     remapping, division, norms, normalization, and adjacent differences.
 License: GPL-3
 Encoding: UTF-8
+Suggests:
+    testthat (>= 3.0.0)
 Config/roxygen2/version: 8.1.0
+Config/testthat/edition: 3
