@@ -1,16 +1,25 @@
 Package: numops
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
+Title: Lightweight Numerical Operations
+Version: 1.0.1
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
+      given = c("Joao", "Claudio"),
+      family = "Macosso",
+      email = "joaoclaudiomacosso@gmail.com",
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0009-0006-5051-9312")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+URL: https://github.com/Macosso/numops
+BugReports: https://github.com/Macosso/numops/issues
+Description: Provides dependency-free helpers for common numerical operations
+    on vectors, matrices, and arrays. Includes bounds, interpolation,
+    remapping, division, norms, normalization, and adjacent differences.
+License: GPL-3
 Encoding: UTF-8
-LazyData: true
+Suggests:
+    testthat (>= 3.0.0)
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0
+Config/testthat/edition: 3
