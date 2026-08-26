@@ -4,9 +4,11 @@ Title: Lightweight Numerical Operations
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
+      given = c("Joao", "Claudio"),
+      family = "Macosso",
+      email = "joaoclaudiomacosso@gmail.com",
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0009-0006-5051-9312")
     )
   )
 Description: Provides dependency-free helpers for common numerical operations
