@@ -1,25 +1,29 @@
 Package: numops
-Type: Package
 Title: Lightweight Numerical Operations
-Version: 1.0.1
-Authors@R: c(
-    person(
-      given = c("Joao", "Claudio"),
-      family = "Macosso",
-      email = "joaoclaudiomacosso@gmail.com",
-      role = c("aut", "cre"),
-      comment = c(ORCID = "0009-0006-5051-9312")
-    )
-  )
+Version: 1.0.0
+Authors@R: 
+    person(given = c("Joao", "Claudio"), 
+          family = "Macosso",
+          email = "joaoclaudiomacosso@gmail.com",
+          role = c("aut", "cre"),
+          comment = c(ORCID = "0009-0006-5051-9312"))
 URL: https://github.com/Macosso/numops
 BugReports: https://github.com/Macosso/numops/issues
-Description: Provides dependency-free helpers for common numerical operations
-    on vectors, matrices, and arrays. Includes bounds, interpolation,
-    remapping, division, norms, normalization, and adjacent differences.
+Description: Provides dependency-free helpers for recurring numerical tasks on
+    vectors, matrices, and arrays. Operations cover bounds, interpolation,
+    remapping, division, Euclidean norms, normalization, and adjacent
+    differences. Multi-input operations use strict scalar recycling, reject
+    incompatible lengths, and preserve names, dimensions, and dimension names
+    where applicable. Explicit handling of invalid intervals, zero
+    denominators, and zero norms gives consistent behavior for common edge
+    cases.
 License: GPL-3
 Encoding: UTF-8
 Suggests:
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0
 Config/testthat/edition: 3

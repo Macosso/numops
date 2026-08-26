@@ -1,0 +1,363 @@
+---
+title: "Common Numerical Operations in R with numops"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Common Numerical Operations in R with numops}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+numops provides dependency-free helpers for common numerical operations on
+vectors, matrices, and arrays. This vignette shows how to clamp, wrap,
+interpolate, remap, divide, and normalize numeric data with consistent input
+validation and shape preservation.
+
+```{r}
+library(numops)
+```
+
+## Why use numops?
+
+Many numerical tasks in R require short but easily repeated expressions. For
+example, clamping a value to an interval requires nested `pmin()` and `pmax()`
+calls, while row normalization requires combining `rowSums()` and `sweep()`.
+numops gives these operations concise names and consistent behavior.
+
+The package has no runtime dependencies. Functions that combine inputs use
+strict scalar recycling, and operations on matrices and arrays preserve their
+dimensions and dimnames.
+
+## Quick reference
+
+| Problem | Function |
+|---|---|
+| Restrict values to an interval | `clamp()` |
+| Restrict probabilities to `[0, 1]` | `clamp01()` |
+| Test whether values are within bounds | `in_range()` |
+| Wrap periodic values | `wrap()` |
+| Interpolate between endpoints | `lerp()` |
+| Find a relative position between endpoints | `inv_lerp()` |
+| Map values between intervals | `remap()` |
+| Calculate a midpoint | `midpoint()` |
+| Divide with a fallback for zero | `divide_or()` |
+| Calculate Euclidean length | `l2_norm()` |
+| Normalize vectors or array slices | `normalize_l2()` |
+| Calculate length-preserving differences | `adjacent_difference()` |
+
+## Clamp and wrap values in R
+
+### Clamp values to an interval
+
+`clamp()` restricts each value to the closed interval `[lower, upper]`. Its
+element-wise formula is
+
+```text
+min(max(x, lower), upper)
+```
+
+```{r}
+x <- c(-3, -1, 0.5, 4, 8)
+
+clamp(x, lower = -1, upper = 4)
+```
+
+Use `clamp01()` when the interval is `[0, 1]`, as is common for probabilities
+and proportions.
+
+```{r}
+clamp01(c(-0.2, 0.35, 1.4, NA))
+```
+
+Missing values in `x` remain missing. Bounds may be infinite, but the lower
+bound cannot exceed the upper bound.
+
+### Test whether values are within a range
+
+`in_range()` performs the inclusive test
+`x >= lower & x <= upper`.
+
+```{r}
+in_range(1:7, lower = 3, upper = 5)
+```
+
+### Wrap angles and periodic values
+
+`wrap()` maps values to the half-open interval `[lower, upper)`. A value at the
+upper boundary wraps to the lower boundary.
+
+```{r}
+wrap(c(-10, 0, 360, 370), lower = 0, upper = 360)
+```
+
+This is useful for angles, clock times, phases, and other periodic quantities.
+
+## Linear interpolation and range remapping in R
+
+### Interpolate between endpoints
+
+`lerp()` implements linear interpolation:
+
+```text
+a + t * (b - a)
+```
+
+At `t = 0`, the result is `a`; at `t = 1`, it is `b`. Values of `t` outside
+`[0, 1]` extrapolate beyond the endpoints.
+
+```{r}
+lerp(a = 10, b = 20, t = c(0, 0.25, 0.5, 1, 1.5))
+```
+
+`inv_lerp()` performs the inverse calculation. It returns the position of `x`
+relative to `a` and `b`:
+
+```text
+(x - a) / (b - a)
+```
+
+```{r}
+inv_lerp(a = 10, b = 20, x = c(5, 10, 15, 20, 25))
+```
+
+Results below zero or above one indicate that `x` lies outside the endpoints.
+
+### Remap one interval to another
+
+`remap()` combines inverse interpolation and interpolation. It maps `x` from
+the interval `from` to the interval `to`:
+
+```text
+to[1] + (x - from[1]) / (from[2] - from[1]) * (to[2] - to[1])
+```
+
+```{r}
+remap(
+  c(0, 25, 50, 75, 100),
+  from = c(0, 100),
+  to = c(-1, 1)
+)
+```
+
+Values outside `from` are extrapolated. Call `clamp()` separately when the
+output must remain inside the destination interval.
+
+### Calculate midpoints safely
+
+`midpoint()` calculates the value halfway between corresponding endpoints. It
+uses equivalent formulas chosen to avoid unnecessary overflow for large finite
+values.
+
+```{r}
+midpoint(c(0, 10), c(10, 30))
+midpoint(-.Machine$double.xmax, .Machine$double.xmax)
+```
+
+## Handle division by zero in R
+
+`divide_or()` evaluates `x / y` except where `y` is zero. At those positions,
+it returns `default`.
+
+```{r}
+divide_or(
+  x = c(12, 8, 5),
+  y = c(3, 0, 2),
+  default = NA_real_
+)
+```
+
+Only a zero denominator triggers the fallback. A missing denominator produces
+a missing result according to ordinary R division.
+
+## Normalize vectors, matrices, and arrays
+
+### Calculate the L2 norm of a vector
+
+For values $x_1, \ldots, x_n$, the Euclidean or L2 norm is
+
+$$
+\lVert x \rVert_2 = \sqrt{\sum_{i = 1}^{n} x_i^2}.
+$$
+
+```{r}
+l2_norm(c(3, 4))
+```
+
+The calculation is scaled internally to avoid unnecessary overflow and
+underflow.
+
+```{r}
+l2_norm(c(1e308, 1e308))
+```
+
+### Normalize a vector to unit length
+
+`normalize_l2()` divides a vector by its L2 norm.
+
+```{r}
+unit_vector <- normalize_l2(c(3, 4))
+
+unit_vector
+l2_norm(unit_vector)
+```
+
+### Normalize matrix rows and columns
+
+The `margin` argument identifies the dimensions that index separate slices.
+For a matrix, `margin = 1` operates on rows and `margin = 2` operates on
+columns.
+
+```{r}
+x <- matrix(
+  c(3, 4, 0, 1, 2, 2),
+  nrow = 2,
+  byrow = TRUE,
+  dimnames = list(c("a", "b"), c("x", "y", "z"))
+)
+
+l2_norm(x, margin = 1)
+normalize_l2(x, margin = 1)
+```
+
+Column normalization uses the same interface.
+
+```{r}
+normalize_l2(x, margin = 2)
+```
+
+The approach extends to higher-dimensional arrays by supplying one or more
+dimensions in `margin`.
+
+### Handle zero-length slices
+
+A zero vector cannot be scaled to unit length. The `zero` argument controls
+the result:
+
+- `"keep"` leaves the zero slice unchanged.
+- `"na"` replaces the slice with missing values.
+- `"error"` stops the calculation.
+
+```{r}
+normalize_l2(c(0, 0), zero = "keep")
+normalize_l2(c(0, 0), zero = "na")
+```
+
+## Calculate adjacent differences
+
+`adjacent_difference()` keeps the first value and then records the change from
+each preceding value:
+
+```text
+result[1] = x[1]
+result[i] = x[i] - x[i - 1]
+```
+
+```{r}
+values <- c(10, 13, 12, 18)
+
+changes <- adjacent_difference(values)
+changes
+cumsum(changes)
+```
+
+Unlike `diff()`, the result has the same length as the input. Applying
+`cumsum()` reconstructs the original values when ordinary arithmetic is
+reversible.
+
+## Recycling and output shape
+
+Functions with multiple numeric inputs use strict scalar recycling. Every
+input must have length one or a shared length. Length-one inputs are recycled;
+other length combinations produce an error.
+
+```{r}
+lerp(a = 0, b = c(10, 20, 30), t = 0.5)
+```
+
+Names, dimensions, and dimnames come from the first input already having the
+shared length.
+
+```{r}
+x <- matrix(
+  1:4,
+  nrow = 2,
+  dimnames = list(c("first", "second"), c("a", "b"))
+)
+
+clamp(x, lower = 2, upper = 3)
+```
+
+This rule avoids the partial recycling that base R permits for some length
+combinations.
+
+## A complete data-preparation example
+
+Consider three sensor readings containing temperature, relative humidity, and
+wind direction. The variables use different units and need separate numerical
+transformations before they can be combined as features.
+
+```{r}
+sensors <- data.frame(
+  temperature = c(18, 22, 30),
+  humidity = c(45, 0, 75),
+  wind_direction = c(-10, 360, 450)
+)
+
+sensors
+```
+
+Map temperatures from 0--40 degrees to `[0, 1]`, convert percentage humidity
+to a proportion, and wrap wind directions to `[0, 360)`.
+
+```{r}
+temperature_score <- remap(
+  sensors$temperature,
+  from = c(0, 40),
+  to = c(0, 1)
+)
+
+humidity_score <- clamp01(
+  divide_or(sensors$humidity, 100, default = NA_real_)
+)
+
+wind_direction <- wrap(
+  sensors$wind_direction,
+  lower = 0,
+  upper = 360
+)
+
+transformed <- data.frame(
+  temperature_score,
+  humidity_score,
+  wind_direction
+)
+
+transformed
+```
+
+The two unitless scores can then be combined and normalized by row.
+
+```{r}
+features <- as.matrix(
+  transformed[c("temperature_score", "humidity_score")]
+)
+
+normalize_l2(features, margin = 1)
+```
+
+This workflow makes each numerical step explicit: remapping changes units,
+clamping enforces valid proportions, wrapping handles periodic values, and L2
+normalization scales feature vectors to unit length.
+
+## Summary
+
+numops supplies a compact vocabulary for recurring numerical tasks in R. The
+functions are dependency-free, work across vectors, matrices, and arrays, and
+share consistent rules for validation, recycling, missing values, and output
+shape. See the individual function help pages for complete edge-case behavior.
