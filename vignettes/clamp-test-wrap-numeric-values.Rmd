@@ -1,0 +1,306 @@
+---
+title: "Clamp, Test, and Wrap Numeric Values in R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Clamp, Test, and Wrap Numeric Values in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Learn how to clamp numeric values to limits, test whether values fall within
+an inclusive range, and wrap angles or other periodic measurements in R with
+the dependency-free numops package.
+
+```{r}
+library(numops)
+```
+
+## Choose the right operation
+
+The bounds functions are related, but they answer different questions.
+
+| Goal | Function | Interval |
+|---|---|---|
+| Replace values outside fixed limits | `clamp()` | `[lower, upper]` |
+| Restrict probabilities or proportions | `clamp01()` | `[0, 1]` |
+| Identify values inside fixed limits | `in_range()` | `[lower, upper]` |
+| Map periodic values to one cycle | `wrap()` | `[lower, upper)` |
+
+`clamp()` and `clamp01()` modify values. `in_range()` returns logical results
+without changing its input. `wrap()` uses modular arithmetic rather than
+replacing values at the nearest boundary.
+
+## Clamp values in R
+
+### Clamp values to a numeric interval
+
+`clamp()` restricts each value to the closed interval `[lower, upper]`. Its
+element-wise formula is
+
+```text
+min(max(x, lower), upper)
+```
+
+Values inside the interval remain unchanged. Values below or above it are
+replaced by the nearest boundary.
+
+```{r}
+x <- c(-3, -1, 0.5, 4, 8)
+
+clamp(x, lower = -1, upper = 4)
+```
+
+The equivalent base R expression requires nested parallel extrema.
+
+```{r}
+pmin(pmax(x, -1), 4)
+```
+
+Both boundaries are included, so values equal to `lower` or `upper` remain
+unchanged.
+
+```{r}
+clamp(c(-1, 4), lower = -1, upper = 4)
+```
+
+### Preserve matrix and array shape
+
+Clamping a matrix preserves its dimensions and dimnames.
+
+```{r}
+x_matrix <- matrix(
+  c(-2, 0, 3, 8),
+  nrow = 2,
+  dimnames = list(c("a", "b"), c("x", "y"))
+)
+
+clamp(x_matrix, lower = 0, upper = 5)
+```
+
+The same rule applies to higher-dimensional arrays.
+
+## Clamp probabilities to zero and one
+
+`clamp01()` is equivalent to `clamp(x, 0, 1)`. It is convenient when small
+numerical errors produce probabilities or proportions just outside their
+valid interval.
+
+```{r}
+probabilities <- c(-0.02, 0.25, 0.8, 1.03)
+
+clamp01(probabilities)
+```
+
+Clamping changes invalid values, while range testing only identifies them.
+
+```{r}
+in_range(probabilities, lower = 0, upper = 1)
+clamp01(probabilities)
+```
+
+When unexpected values may indicate a data problem, test and investigate them
+before deciding whether clamping is appropriate.
+
+## Test whether values are within a range
+
+`in_range()` evaluates the inclusive condition
+
+```text
+x >= lower & x <= upper
+```
+
+```{r}
+x <- c(-2, 0, 3, 5, 8)
+
+in_range(x, lower = 0, upper = 5)
+```
+
+The logical result can be used directly for filtering.
+
+```{r}
+x[in_range(x, lower = 0, upper = 5)]
+```
+
+Both endpoints belong to the interval.
+
+```{r}
+in_range(c(0, 5), lower = 0, upper = 5)
+```
+
+Missing inputs produce missing logical results rather than `TRUE` or `FALSE`.
+
+```{r}
+in_range(c(1, NA, 5), lower = 0, upper = 4)
+```
+
+## Wrap angles and periodic values in R
+
+`wrap()` maps values to the half-open interval `[lower, upper)`. Its conceptual
+formula is
+
+```text
+lower + (x - lower) %% (upper - lower)
+```
+
+The implementation uses an equivalent calculation that avoids unnecessary
+overflow.
+
+### Wrap angles to one rotation
+
+Angles outside a canonical rotation can be wrapped to `[0, 360)`.
+
+```{r}
+angles <- c(-370, -10, 0, 360, 370, 725)
+
+wrap(angles, lower = 0, upper = 360)
+```
+
+The lower boundary is included and the upper boundary is excluded. Therefore,
+an angle of 360 degrees maps to zero rather than remaining 360.
+
+This differs from `in_range()`, which always includes both boundaries. To test
+whether an angle is already in the canonical half-open interval, use an
+explicit upper comparison.
+
+```{r}
+angles >= 0 & angles < 360
+```
+
+### Wrap clock times and phases
+
+The same operation applies to clock times.
+
+```{r}
+hours <- c(-2, 0, 12, 24, 27, 49)
+
+wrap(hours, lower = 0, upper = 24)
+```
+
+A symmetric interval is often useful for phase angles.
+
+```{r}
+phases <- c(-2 * pi, -pi, 0, pi, 2 * pi)
+
+wrap(phases, lower = -pi, upper = pi)
+```
+
+### Visualize periodic wrapping
+
+Wrapping produces a repeating sawtooth pattern. Each complete cycle returns
+the result to the lower boundary.
+
+```{r wrap-plot, fig.alt = "Wrapped angle against original angle"}
+angle_sequence <- seq(-720, 720, length.out = 500)
+
+plot(
+  angle_sequence,
+  wrap(angle_sequence, lower = 0, upper = 360),
+  type = "l",
+  xlab = "Original angle",
+  ylab = "Wrapped angle",
+  main = "Wrapping angles to [0, 360)"
+)
+```
+
+## Scalar recycling and vectorized bounds
+
+Bounds may have length one or the same length as the values being processed.
+Scalar bounds are recycled to the shared length.
+
+```{r}
+clamp(c(-2, 5, 20), lower = 0, upper = 10)
+```
+
+Vectorized bounds allow each position to use a different interval.
+
+```{r}
+x <- c(-2, 5, 20)
+lower <- c(0, 0, 10)
+upper <- c(1, 10, 15)
+
+clamp(x, lower, upper)
+in_range(x, lower, upper)
+```
+
+Every argument must have length one or a shared length. Other combinations are
+errors rather than partial recycling. Names, dimensions, and dimnames come
+from the first input already having the shared length.
+
+## Missing and infinite values
+
+The bounds functions use consistent rules for missing and non-finite values.
+
+| Condition | Behavior |
+|---|---|
+| Missing value in `x` | Produces a missing result |
+| Missing bound | Produces an error |
+| `lower > upper` | Produces an error |
+| Infinite bound in `clamp()` or `in_range()` | Allowed |
+| Infinite bound in `wrap()` | Produces an error |
+| Infinite value passed to `wrap()` | Produces `NaN` |
+| Equal lower and upper bounds in `wrap()` | Produces an error |
+
+An empty numeric input is returned with length zero, provided its bounds are
+valid.
+
+## A validation-and-correction workflow
+
+Consider measurements containing probabilities and angles. First record which
+probabilities are valid before applying any correction.
+
+```{r}
+measurements <- data.frame(
+  probability = c(-0.02, 0.35, 1.04, NA),
+  angle = c(-10, 45, 360, 725)
+)
+
+measurements$probability_valid <- in_range(
+  measurements$probability,
+  lower = 0,
+  upper = 1
+)
+
+measurements
+```
+
+If the out-of-range probabilities are known numerical artifacts, clamp them to
+the valid interval. Wrap the angles to a canonical rotation at the same time.
+
+```{r}
+measurements$probability <- clamp01(
+  measurements$probability
+)
+
+measurements$angle <- wrap(
+  measurements$angle,
+  lower = 0,
+  upper = 360
+)
+
+measurements
+```
+
+The validation column preserves which probabilities required attention, while
+the transformed columns are ready for downstream calculations.
+
+## Interval semantics at a glance
+
+The most important distinction among these functions is whether the upper
+boundary is included.
+
+```text
+clamp():    [lower, upper]
+in_range(): [lower, upper]
+wrap():     [lower, upper)
+```
+
+Use `clamp()` to enforce limits, `in_range()` to validate or filter values, and
+`wrap()` to represent periodic values in a single cycle. Use `clamp01()` when
+the required limits are specifically zero and one.
