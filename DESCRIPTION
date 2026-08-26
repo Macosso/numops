@@ -1,6 +1,6 @@
 Package: numops
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Lightweight Numerical Operations
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -9,8 +9,9 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: Provides dependency-free helpers for common numerical operations
+    on vectors, matrices, and arrays. Includes bounds, interpolation,
+    remapping, division, norms, normalization, and adjacent differences.
 License: What license is it under?
 Encoding: UTF-8
-LazyData: true
+Config/roxygen2/version: 8.1.0
