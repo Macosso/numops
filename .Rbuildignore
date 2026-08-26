@@ -6,3 +6,6 @@
 ^README\.Rmd$
 ^.*\.Rcheck$
 ^.*\.tar\.gz$
+^doc$
+^Meta$
+^doc$
