@@ -19,17 +19,21 @@
 
 #' Euclidean norm
 #'
-#' Computes the Euclidean or L2 norm of a numeric object.
+#' Computes Euclidean lengths for a complete object or for slices selected by
+#' `margin`.
 #'
-#' @param x A numeric object.
-#' @param margin Dimensions to retain when computing norms, or `NULL` to use
-#'   all elements.
+#' @param x A numeric vector, matrix, or array.
+#' @param margin An integer vector naming the dimensions that index separate
+#'   slices, or `NULL` to treat all elements as one vector. For a matrix,
+#'   `margin = 1` computes row norms and `margin = 2` computes column norms.
 #'
-#' @return A numeric scalar when `margin` is `NULL`; otherwise, a numeric
-#'   object indexed by the retained dimensions.
+#' @return If `margin` is `NULL`, one numeric value. Otherwise, a numeric vector
+#'   or array indexed by `dim(x)[margin]`, with the corresponding dimnames.
 #'
-#' @details The calculation is scaled to avoid unnecessary overflow and
-#'   underflow. A missing value produces a missing norm for its slice.
+#' @details For a slice with values `x[i]`, the L2 norm is
+#'   `sqrt(sum(x[i]^2))`. The calculation is scaled to avoid unnecessary
+#'   overflow and underflow. An empty slice has norm zero, an infinite value
+#'   produces an infinite norm, and a missing value produces a missing norm.
 #'
 #' @examples
 #' l2_norm(c(3, 4))
@@ -49,18 +53,23 @@ l2_norm <- function(x, margin = NULL) {
 
 #' Normalize to unit Euclidean length
 #'
-#' Scales a numeric object, or slices of it, to have Euclidean length one.
+#' Divides a numeric object, or each selected slice, by its Euclidean norm.
 #'
-#' @param x A numeric object.
-#' @param margin Dimensions to retain when normalizing slices, or `NULL` to
-#'   normalize all elements together.
-#' @param zero How to handle zero-length slices: keep them unchanged, replace
-#'   them with missing values, or throw an error.
+#' @param x A numeric vector, matrix, or array to normalize.
+#' @param margin An integer vector naming the dimensions that index separate
+#'   slices, or `NULL` to normalize all elements together. For a matrix,
+#'   `margin = 1` normalizes rows and `margin = 2` normalizes columns.
+#' @param zero How to handle a slice whose norm is zero. `"keep"` leaves the
+#'   slice unchanged, `"na"` replaces it with missing values, and `"error"`
+#'   stops the calculation.
 #'
-#' @return A numeric object with the same dimensions and dimnames as `x`.
+#' @return A numeric vector, matrix, or array with the same length, names,
+#'   dimensions, and dimnames as `x`.
 #'
-#' @details Missing values produce missing normalized slices. Infinite values
-#'   follow ordinary division by an infinite norm.
+#' @details Each slice `s` is transformed to `s / l2_norm(s)`. Nonzero finite
+#'   slices therefore have an L2 norm of one. A missing value makes its entire
+#'   slice missing. Infinite values follow ordinary division by an infinite
+#'   norm.
 #'
 #' @examples
 #' normalize_l2(c(3, 4))

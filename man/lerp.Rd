@@ -7,20 +7,33 @@
 lerp(a, b, t)
 }
 \arguments{
-\item{a, b}{Numeric endpoints.}
+\item{a}{A numeric endpoint returned when \code{t = 0}.}
 
-\item{t}{A numeric interpolation proportion.}
+\item{b}{A numeric endpoint returned when \code{t = 1}.}
+
+\item{t}{A numeric interpolation proportion, usually between zero and one.}
 }
 \value{
-A numeric object with the shape of the longest argument.
+A numeric vector, matrix, or array of the shared length. It takes
+names, dimensions, and dimnames from the first input already having that
+length.
 }
 \description{
-Interpolates from `a` to `b` by the proportion `t`.
+Computes the value a proportion \code{t} of the way from \code{a} to \code{b}.
 }
 \details{
-Values of `t` outside zero and one extrapolate. The endpoints are
-  returned exactly when `t` is zero or one.
+Each result is computed as \code{a + t * (b - a)}, using a calculation
+that avoids unnecessary overflow when \code{a} and \code{b} have opposite signs.
+Values of \code{t} outside \verb{[0, 1]} extrapolate. The endpoints are returned
+exactly when \code{t} is zero or one.
 }
+\section{Recycling}{
+
+\code{a}, \code{b}, and \code{t} must each have length one or a shared length. Length-one
+inputs are recycled; other length combinations are errors. Names,
+dimensions, and dimnames come from the first input with the shared length.
+}
+
 \examples{
 lerp(10, 20, c(0, 0.25, 1))
 

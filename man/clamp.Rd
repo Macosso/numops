@@ -7,21 +7,34 @@
 clamp(x, lower, upper)
 }
 \arguments{
-\item{x}{A numeric object.}
+\item{x}{A numeric vector, matrix, or array containing values to restrict.}
 
-\item{lower, upper}{Numeric lower and upper bounds. Each must have size one
-or a size compatible with `x`.}
+\item{lower}{A numeric lower bound giving the smallest permitted value.}
+
+\item{upper}{A numeric upper bound giving the greatest permitted value.}
 }
 \value{
-A numeric object with the shape of the longest argument.
+A numeric vector, matrix, or array of the shared length. It takes
+names, dimensions, and dimnames from the first input already having that
+length.
 }
 \description{
-Restricts values to the closed interval defined by `lower` and `upper`.
+Replaces values below \code{lower} with \code{lower} and values above \code{upper} with
+\code{upper}.
 }
 \details{
-Missing values in `x` are preserved. Bounds may be infinite, but
-  must not be missing, and `lower` must not exceed `upper`.
+Each result is computed as
+\code{min(max(x, lower), upper)}. Missing values in \code{x} are preserved. Bounds
+may be infinite, but must not be missing or have \code{lower > upper}.
 }
+\section{Recycling}{
+
+\code{x}, \code{lower}, and \code{upper} must each have length one or a shared length.
+Length-one inputs are recycled; other length combinations are errors.
+Names, dimensions, and dimnames come from the first input with the shared
+length.
+}
+
 \examples{
 clamp(c(-1, 0.5, 2), 0, 1)
 

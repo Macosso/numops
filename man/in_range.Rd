@@ -7,22 +7,34 @@
 in_range(x, lower, upper)
 }
 \arguments{
-\item{x}{A numeric object.}
+\item{x}{A numeric vector, matrix, or array containing values to test.}
 
-\item{lower, upper}{Numeric lower and upper bounds. Each must have size one
-or a size compatible with `x`.}
+\item{lower}{A numeric inclusive lower bound.}
+
+\item{upper}{A numeric inclusive upper bound.}
 }
 \value{
-A logical object with the shape of the longest argument.
+A logical vector, matrix, or array of the shared length. It takes
+names, dimensions, and dimnames from the first input already having that
+length.
 }
 \description{
-Tests whether values fall in the closed interval defined by `lower` and
-`upper`.
+Tests whether each value falls in the closed interval from \code{lower} to
+\code{upper}.
 }
 \details{
-Missing values in `x` produce missing results. Bounds may be
-  infinite, but must not be missing.
+Each result is computed as \code{x >= lower & x <= upper}. Missing
+values in \code{x} produce missing results. Bounds may be infinite, but must
+not be missing or have \code{lower > upper}.
 }
+\section{Recycling}{
+
+\code{x}, \code{lower}, and \code{upper} must each have length one or a shared length.
+Length-one inputs are recycled; other length combinations are errors.
+Names, dimensions, and dimnames come from the first input with the shared
+length.
+}
+
 \examples{
 in_range(1:5, 2, 4)
 

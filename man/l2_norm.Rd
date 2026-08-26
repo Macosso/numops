@@ -7,21 +7,25 @@
 l2_norm(x, margin = NULL)
 }
 \arguments{
-\item{x}{A numeric object.}
+\item{x}{A numeric vector, matrix, or array.}
 
-\item{margin}{Dimensions to retain when computing norms, or `NULL` to use
-all elements.}
+\item{margin}{An integer vector naming the dimensions that index separate
+slices, or \code{NULL} to treat all elements as one vector. For a matrix,
+\code{margin = 1} computes row norms and \code{margin = 2} computes column norms.}
 }
 \value{
-A numeric scalar when `margin` is `NULL`; otherwise, a numeric
-  object indexed by the retained dimensions.
+If \code{margin} is \code{NULL}, one numeric value. Otherwise, a numeric vector
+or array indexed by \code{dim(x)[margin]}, with the corresponding dimnames.
 }
 \description{
-Computes the Euclidean or L2 norm of a numeric object.
+Computes Euclidean lengths for a complete object or for slices selected by
+\code{margin}.
 }
 \details{
-The calculation is scaled to avoid unnecessary overflow and
-  underflow. A missing value produces a missing norm for its slice.
+For a slice with values \code{x[i]}, the L2 norm is
+\code{sqrt(sum(x[i]^2))}. The calculation is scaled to avoid unnecessary
+overflow and underflow. An empty slice has norm zero, an infinite value
+produces an infinite norm, and a missing value produces a missing norm.
 }
 \examples{
 l2_norm(c(3, 4))

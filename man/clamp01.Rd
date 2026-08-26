@@ -7,16 +7,18 @@
 clamp01(x)
 }
 \arguments{
-\item{x}{A numeric object.}
+\item{x}{A numeric vector, matrix, or array containing values to restrict.}
 }
 \value{
-A numeric object with the same shape as `x`.
+A numeric vector, matrix, or array with the same length, names,
+dimensions, and dimnames as \code{x}.
 }
 \description{
-Restricts values to the closed interval from zero to one.
+Replaces values below zero with zero and values above one with one.
 }
 \details{
-Missing values are preserved.
+This is equivalent to \code{clamp(x, 0, 1)}, or element-wise to
+\code{min(max(x, 0), 1)}. Missing values are preserved.
 }
 \examples{
 clamp01(c(-0.2, 0.4, 1.3))

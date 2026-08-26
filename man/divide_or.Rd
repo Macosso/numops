@@ -7,21 +7,35 @@
 divide_or(x, y, default = NA_real_)
 }
 \arguments{
-\item{x, y}{Numeric objects.}
+\item{x}{A numeric numerator.}
 
-\item{default}{A numeric fallback value.}
+\item{y}{A numeric denominator.}
+
+\item{default}{The numeric value to return where \code{y == 0}. The default is
+\code{NA_real_}.}
 }
 \value{
-A numeric object with the shape of the longest argument.
+A numeric vector, matrix, or array of the shared length. It takes
+names, dimensions, and dimnames from the first input already having that
+length.
 }
 \description{
-Divides `x` by `y` and substitutes `default` where `y` is zero.
+Divides corresponding values and substitutes a chosen result wherever the
+denominator is zero.
 }
 \details{
-Only zero denominators trigger the fallback. Other missing or
-  non-finite results follow ordinary R division. Arguments use strict
-  scalar recycling.
+The result is \code{x / y} where \code{y != 0}, and \code{default} where
+\code{y == 0}. Missing denominators and other non-finite results follow
+ordinary R division; they do not trigger \code{default}.
 }
+\section{Recycling}{
+
+\code{x}, \code{y}, and \code{default} must each have length one or a shared length.
+Length-one inputs are recycled; other length combinations are errors.
+Names, dimensions, and dimnames come from the first input with the shared
+length.
+}
+
 \examples{
 divide_or(c(1, 2, 0), c(1, 0, 0), default = NA_real_)
 

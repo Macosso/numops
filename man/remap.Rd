@@ -7,23 +7,24 @@
 remap(x, from, to)
 }
 \arguments{
-\item{x}{A numeric object.}
+\item{x}{A numeric vector, matrix, or array containing values to map.}
 
-\item{from}{A finite numeric vector of length two defining the input
-interval.}
+\item{from}{A finite numeric vector of length two giving the input endpoints.}
 
-\item{to}{A finite numeric vector of length two defining the output
-interval.}
+\item{to}{A finite numeric vector of length two giving the output endpoints.}
 }
 \value{
-A numeric object with the same shape as `x`.
+A numeric vector, matrix, or array with the same length, names,
+dimensions, and dimnames as \code{x}.
 }
 \description{
-Maps values from one interval to another by linear interpolation.
+Linearly maps values from the interval \code{from} to the interval \code{to}.
 }
 \details{
-Values outside `from` are extrapolated. The input interval may be
-  reversed, but its endpoints must differ.
+The result is
+\code{to[1] + (x - from[1]) / (from[2] - from[1]) * (to[2] - to[1])}.
+Values outside \code{from} are extrapolated. Either interval may be reversed,
+but the endpoints of \code{from} must differ.
 }
 \examples{
 remap(c(0, 5, 10), c(0, 10), c(-1, 1))

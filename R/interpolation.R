@@ -1,14 +1,24 @@
 #' Linear interpolation
 #'
-#' Interpolates from `a` to `b` by the proportion `t`.
+#' Computes the value a proportion `t` of the way from `a` to `b`.
 #'
-#' @param a,b Numeric endpoints.
-#' @param t A numeric interpolation proportion.
+#' @param a A numeric endpoint returned when `t = 0`.
+#' @param b A numeric endpoint returned when `t = 1`.
+#' @param t A numeric interpolation proportion, usually between zero and one.
 #'
-#' @return A numeric object with the shape of the longest argument.
+#' @return A numeric vector, matrix, or array of the shared length. It takes
+#'   names, dimensions, and dimnames from the first input already having that
+#'   length.
 #'
-#' @details Values of `t` outside zero and one extrapolate. The endpoints are
-#'   returned exactly when `t` is zero or one.
+#' @details Each result is computed as `a + t * (b - a)`, using a calculation
+#'   that avoids unnecessary overflow when `a` and `b` have opposite signs.
+#'   Values of `t` outside `[0, 1]` extrapolate. The endpoints are returned
+#'   exactly when `t` is zero or one.
+#'
+#' @section Recycling:
+#' `a`, `b`, and `t` must each have length one or a shared length. Length-one
+#' inputs are recycled; other length combinations are errors. Names,
+#' dimensions, and dimnames come from the first input with the shared length.
 #'
 #' @examples
 #' lerp(10, 20, c(0, 0.25, 1))
@@ -42,15 +52,26 @@ lerp <- function(a, b, t) {
 
 #' Inverse linear interpolation
 #'
-#' Calculates the relative position of `x` between `a` and `b`.
+#' Calculates how far `x` lies from `a` toward `b`.
 #'
-#' @param a,b Numeric endpoints. They must differ at every position.
-#' @param x A numeric object containing values to locate.
+#' @param a A numeric endpoint corresponding to a result of zero.
+#' @param b A numeric endpoint corresponding to a result of one. It must differ
+#'   from `a` at every non-missing position.
+#' @param x A numeric vector, matrix, or array containing values to locate.
 #'
-#' @return A numeric object with the shape of the longest argument.
+#' @return A numeric vector, matrix, or array of the shared length. It takes
+#'   names, dimensions, and dimnames from the first input already having that
+#'   length.
 #'
-#' @details Results may be outside zero and one. Infinite endpoints are not
-#'   supported. Missing values are propagated.
+#' @details Each result is `(x - a) / (b - a)`, calculated to avoid
+#'   unnecessary overflow for widely separated endpoints. Results outside
+#'   `[0, 1]` indicate that `x` lies outside the endpoints. Infinite endpoints
+#'   are not supported, and missing values are propagated.
+#'
+#' @section Recycling:
+#' `a`, `b`, and `x` must each have length one or a shared length. Length-one
+#' inputs are recycled; other length combinations are errors. Names,
+#' dimensions, and dimnames come from the first input with the shared length.
 #'
 #' @examples
 #' inv_lerp(10, 20, c(10, 15, 20))
@@ -94,18 +115,19 @@ inv_lerp <- function(a, b, x) {
 
 #' Remap values between intervals
 #'
-#' Maps values from one interval to another by linear interpolation.
+#' Linearly maps values from the interval `from` to the interval `to`.
 #'
-#' @param x A numeric object.
-#' @param from A finite numeric vector of length two defining the input
-#'   interval.
-#' @param to A finite numeric vector of length two defining the output
-#'   interval.
+#' @param x A numeric vector, matrix, or array containing values to map.
+#' @param from A finite numeric vector of length two giving the input endpoints.
+#' @param to A finite numeric vector of length two giving the output endpoints.
 #'
-#' @return A numeric object with the same shape as `x`.
+#' @return A numeric vector, matrix, or array with the same length, names,
+#'   dimensions, and dimnames as `x`.
 #'
-#' @details Values outside `from` are extrapolated. The input interval may be
-#'   reversed, but its endpoints must differ.
+#' @details The result is
+#'   `to[1] + (x - from[1]) / (from[2] - from[1]) * (to[2] - to[1])`.
+#'   Values outside `from` are extrapolated. Either interval may be reversed,
+#'   but the endpoints of `from` must differ.
 #'
 #' @examples
 #' remap(c(0, 5, 10), c(0, 10), c(-1, 1))
@@ -133,14 +155,23 @@ remap <- function(x, from, to) {
 
 #' Midpoint between values
 #'
-#' Computes the midpoint between corresponding values in `x` and `y`.
+#' Computes the value halfway between corresponding values in `x` and `y`.
 #'
-#' @param x,y Numeric objects.
+#' @param x The first numeric endpoint.
+#' @param y The second numeric endpoint.
 #'
-#' @return A numeric object with the shape of the longest argument.
+#' @return A numeric vector, matrix, or array of the shared length. It takes
+#'   names, dimensions, and dimnames from the first input already having that
+#'   length.
 #'
-#' @details The calculation avoids avoidable overflow for finite values.
+#' @details The mathematical result is `(x + y) / 2`. The implementation uses
+#'   equivalent forms chosen to avoid unnecessary overflow for finite values.
 #'   Missing and infinite values follow ordinary R arithmetic.
+#'
+#' @section Recycling:
+#' `x` and `y` must each have length one or a shared length. Length-one inputs
+#' are recycled; other length combinations are errors. Names, dimensions, and
+#' dimnames come from the first input with the shared length.
 #'
 #' @examples
 #' midpoint(c(0, 10), c(10, 20))

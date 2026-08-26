@@ -7,20 +7,34 @@
 inv_lerp(a, b, x)
 }
 \arguments{
-\item{a, b}{Numeric endpoints. They must differ at every position.}
+\item{a}{A numeric endpoint corresponding to a result of zero.}
 
-\item{x}{A numeric object containing values to locate.}
+\item{b}{A numeric endpoint corresponding to a result of one. It must differ
+from \code{a} at every non-missing position.}
+
+\item{x}{A numeric vector, matrix, or array containing values to locate.}
 }
 \value{
-A numeric object with the shape of the longest argument.
+A numeric vector, matrix, or array of the shared length. It takes
+names, dimensions, and dimnames from the first input already having that
+length.
 }
 \description{
-Calculates the relative position of `x` between `a` and `b`.
+Calculates how far \code{x} lies from \code{a} toward \code{b}.
 }
 \details{
-Results may be outside zero and one. Infinite endpoints are not
-  supported. Missing values are propagated.
+Each result is \code{(x - a) / (b - a)}, calculated to avoid
+unnecessary overflow for widely separated endpoints. Results outside
+\verb{[0, 1]} indicate that \code{x} lies outside the endpoints. Infinite endpoints
+are not supported, and missing values are propagated.
 }
+\section{Recycling}{
+
+\code{a}, \code{b}, and \code{x} must each have length one or a shared length. Length-one
+inputs are recycled; other length combinations are errors. Names,
+dimensions, and dimnames come from the first input with the shared length.
+}
+
 \examples{
 inv_lerp(10, 20, c(10, 15, 20))
 

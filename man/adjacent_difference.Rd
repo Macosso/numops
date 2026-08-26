@@ -7,17 +7,20 @@
 adjacent_difference(x)
 }
 \arguments{
-\item{x}{A numeric vector.}
+\item{x}{A numeric vector in the order in which differences are required.}
 }
 \value{
-A numeric vector with the same length and names as `x`.
+A numeric vector with the same length and names as \code{x}.
 }
 \description{
-Returns the first value followed by differences between adjacent values.
+Keeps the first value and replaces every later value with its change from
+the preceding value.
 }
 \details{
-Unlike [diff()], the result has the same length as the input. An
-  empty input is returned unchanged.
+For nonempty \code{x}, the result satisfies \code{result[1] = x[1]} and
+\code{result[i] = x[i] - x[i - 1]} for later positions. Unlike \code{\link[=diff]{diff()}}, the
+first value is retained, so the input can be recovered with \code{\link[=cumsum]{cumsum()}}.
+An empty input is returned unchanged.
 }
 \examples{
 adjacent_difference(c(10, 13, 12))

@@ -7,21 +7,34 @@
 wrap(x, lower, upper)
 }
 \arguments{
-\item{x}{A numeric object.}
+\item{x}{A numeric vector, matrix, or array containing values to wrap.}
 
-\item{lower, upper}{Finite numeric bounds. Each must have size one or a size
-compatible with `x`.}
+\item{lower}{A finite numeric lower boundary included in the result.}
+
+\item{upper}{A finite numeric upper boundary excluded from the result.}
 }
 \value{
-A numeric object with the shape of the longest argument.
+A numeric vector, matrix, or array of the shared length. It takes
+names, dimensions, and dimnames from the first input already having that
+length.
 }
 \description{
-Wraps values to the half-open interval from `lower` to `upper`.
+Periodically maps values to the half-open interval \verb{[lower, upper)}.
 }
 \details{
-`lower` must be less than `upper`. Values equal to `upper` wrap to
-  `lower`. Infinite values in `x` produce `NaN`.
+The operation is equivalent to
+\code{lower + (x - lower) \%\% (upper - lower)}, using an overflow-resistant
+calculation. Bounds must be finite with \code{lower < upper}. A value equal to
+\code{upper} maps to \code{lower}; infinite values in \code{x} produce \code{NaN}.
 }
+\section{Recycling}{
+
+\code{x}, \code{lower}, and \code{upper} must each have length one or a shared length.
+Length-one inputs are recycled; other length combinations are errors.
+Names, dimensions, and dimnames come from the first input with the shared
+length.
+}
+
 \examples{
 wrap(c(-10, 0, 370), 0, 360)
 

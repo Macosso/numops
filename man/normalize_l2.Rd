@@ -7,23 +7,28 @@
 normalize_l2(x, margin = NULL, zero = c("keep", "na", "error"))
 }
 \arguments{
-\item{x}{A numeric object.}
+\item{x}{A numeric vector, matrix, or array to normalize.}
 
-\item{margin}{Dimensions to retain when normalizing slices, or `NULL` to
-normalize all elements together.}
+\item{margin}{An integer vector naming the dimensions that index separate
+slices, or \code{NULL} to normalize all elements together. For a matrix,
+\code{margin = 1} normalizes rows and \code{margin = 2} normalizes columns.}
 
-\item{zero}{How to handle zero-length slices: keep them unchanged, replace
-them with missing values, or throw an error.}
+\item{zero}{How to handle a slice whose norm is zero. \code{"keep"} leaves the
+slice unchanged, \code{"na"} replaces it with missing values, and \code{"error"}
+stops the calculation.}
 }
 \value{
-A numeric object with the same dimensions and dimnames as `x`.
+A numeric vector, matrix, or array with the same length, names,
+dimensions, and dimnames as \code{x}.
 }
 \description{
-Scales a numeric object, or slices of it, to have Euclidean length one.
+Divides a numeric object, or each selected slice, by its Euclidean norm.
 }
 \details{
-Missing values produce missing normalized slices. Infinite values
-  follow ordinary division by an infinite norm.
+Each slice \code{s} is transformed to \code{s / l2_norm(s)}. Nonzero finite
+slices therefore have an L2 norm of one. A missing value makes its entire
+slice missing. Infinite values follow ordinary division by an infinite
+norm.
 }
 \examples{
 normalize_l2(c(3, 4))
