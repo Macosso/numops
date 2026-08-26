@@ -8,4 +8,4 @@
 ^.*\.tar\.gz$
 ^doc$
 ^Meta$
-^doc$
+^docs$
