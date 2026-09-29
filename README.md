@@ -4,8 +4,10 @@
 # numops <a href="https://cran.r-project.org/package=numops"><img src="man/figures/logo.png" align="right" height="139" alt="numops logo" /></a>
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/Macosso/numops/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Macosso/numops/actions/workflows/R-CMD-check.yaml)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/numops)](https://cran.r-project.org/package=numops)
+[![CRAN status](https://www.r-pkg.org/badges/version/numops)](https://CRAN.R-project.org/package=numops)
+[![r-universe](https://macosso.r-universe.dev/numops/badges/version)](https://macosso.r-universe.dev/numops)
 <!-- badges: end -->
 
 numops provides small, dependency-free numerical operations for vectors,
@@ -15,6 +17,10 @@ recycling, and shape-preserving behavior.
 
 ## Installation
 
+Install official release version from CRAN
+```r
+install.packages("numops")
+```
 You can install the development version of numops from
 [GitHub](https://github.com/Macosso/numops) with:
 
